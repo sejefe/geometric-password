@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Geometric Password — password generator using geometric shapes and mathematical sequences to derive unique, strong passwords.">
+  <meta name="theme-color" content="#1a1b26">
+  <title>Geometric Password — Geometric Randomness</title>
+
+  <!-- Favicons -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231a1b26'/><polygon points='16,4 28,24 4,24' stroke='%23e8553e' stroke-width='1.5' fill='none'/><circle cx='16' cy='16' r='2' fill='%233d6cfa'/></svg>">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- QR Code library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Breach dictionary (update this file to refresh the list) -->
+  <script src="data/breach-dictionary.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app">
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-inner">
+      <div class="site-eyebrow">Geometric Password</div>
+      <div class="headline">Geometric<br><em>Randomness</em></div>
+      <div class="tagline">// seed + shape + time → unique cipher every time</div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- Shape preview -->
+    <div class="canvas-card">
+      <div class="canvas-bg">
+        <canvas id="gc" width="400" height="400"></canvas>
+      </div>
+      <span class="shape-badge" id="shapeLabel">fibonacci spiral</span>
+      <div class="method-text" id="methodText"></div>
+    </div>
+
+    <!-- Step 1: Geometry -->
+    <div class="card">
+      <div class="sec-label"><span class="step">1</span> Select geometry</div>
+      <div class="shape-grid">
+        <button class="shape-btn active" data-shape="fibonacci">
+          <svg viewBox="0 0 44 44" fill="none">
+            <path d="M22,22 Q22,6 38,6" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M22,22 Q38,22 38,6" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M22,22 Q22,38 6,38" stroke="currentColor" stroke-width="1.4"/>
+            <path d="M22,22 Q6,22 6,38" stroke="currentColor" stroke-width="1.4"/>
+            <circle cx="22" cy="22" r="2.5" fill="currentColor"/>
+          </svg>
+          <span class="lbl">Fibonacci</span>
+        </button>
+        <button class="shape-btn" data-shape="dodecahedron">
+          <svg viewBox="0 0 44 44" fill="none">
+            <polygon points="22,3 33,9 37,21 29,33 15,33 7,21 11,9" stroke="currentColor" stroke-width="1.4"/>
+            <polygon points="22,10 29,14 31,22 25,29 19,29 13,22 15,14" stroke="currentColor" stroke-width="0.9"/>
+            <line x1="22" y1="3" x2="22" y2="10" stroke="currentColor" stroke-width="0.9"/>
+            <line x1="33" y1="9" x2="29" y2="14" stroke="currentColor" stroke-width="0.9"/>
+            <line x1="37" y1="21" x2="31" y2="22" stroke="currentColor" stroke-width="0.9"/>
+            <line x1="29" y1="33" x2="25" y2="29" stroke="currentColor" stroke-width="0.9"/>
+            <line x1="15" y1="33" x2="19" y2="29" stroke="currentColor" stroke-width="0.9"/>
+            <line x1="7" y1="21" x2="13" y2="22" stroke="currentColor" stroke-width="0.9"/>
+            <line x1="11" y1="9" x2="15" y2="14" stroke="currentColor" stroke-width="0.9"/>
+          </svg>
+          <span class="lbl">Dodecahedron</span>
+        </button>
+        <button class="shape-btn" data-shape="tetrahedron">
+          <svg viewBox="0 0 44 44" fill="none">
+            <polygon points="22,4 40,36 4,36" stroke="currentColor" stroke-width="1.4"/>
+            <line x1="22" y1="4" x2="22" y2="36" stroke="currentColor" stroke-width="0.9" stroke-dasharray="2,2"/>
+            <line x1="22" y1="36" x2="30" y2="20" stroke="currentColor" stroke-width="0.9" stroke-dasharray="2,2"/>
+            <line x1="22" y1="4" x2="14" y2="28" stroke="currentColor" stroke-width="0.9" stroke-dasharray="2,2"/>
+          </svg>
+          <span class="lbl">Tetrahedron</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Mode -->
+    <div class="card">
+      <div class="sec-label"><span class="step">2</span> Output mode</div>
+      <div class="mode-row">
+        <button class="mode-btn active" data-mode="password">
+          <span class="m-name">Password</span>
+          <span class="m-desc">Character-based cipher</span>
+        </button>
+        <button class="mode-btn" data-mode="passphrase">
+          <span class="m-name">Passphrase</span>
+          <span class="m-desc">Word sequence (NIST)</span>
+        </button>
+      </div>
+
+      <!-- Password options -->
+      <div id="pwdOptions">
+        <div class="sec-label" style="margin-bottom:8px"><span class="step">3</span> Length</div>
+        <div class="slider-row">
+          <div><div class="len-big" id="lenVal">24</div><div class="len-unit">chars</div></div>
+          <input type="range" id="lenSlider" min="5" max="100" value="24" step="1">
+        </div>
+        <div class="range-labels"><span>5</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
+
+        <div class="sec-label" style="margin-top:1rem;margin-bottom:8px"><span class="step">4</span> Character set</div>
+        <div class="cs-grid">
+          <button class="cs-btn active" data-cs="full">
+            <div class="cs-radio"><div class="cs-dot"></div></div>
+            <div><div class="cs-name">Full</div><div class="cs-sample">A-Z a-z 0-9 !@#…</div></div>
+          </button>
+          <button class="cs-btn" data-cs="alnum">
+            <div class="cs-radio"><div class="cs-dot"></div></div>
+            <div><div class="cs-name">Alphanumeric</div><div class="cs-sample">A-Z a-z 0-9</div></div>
+          </button>
+          <button class="cs-btn" data-cs="hex">
+            <div class="cs-radio"><div class="cs-dot"></div></div>
+            <div><div class="cs-name">Hexadecimal</div><div class="cs-sample">0-9 a-f</div></div>
+          </button>
+          <button class="cs-btn" data-cs="pin">
+            <div class="cs-radio"><div class="cs-dot"></div></div>
+            <div><div class="cs-name">Numeric PIN</div><div class="cs-sample">0 1 2 … 9</div></div>
+          </button>
+        </div>
+
+        <div class="toggle-row" style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+          <div class="toggle-info">
+            <div class="toggle-name">Exclude ambiguous characters</div>
+            <div class="toggle-desc">Remove 0 O o 1 l I ` ' " to avoid confusion when typing</div>
+          </div>
+          <button class="toggle" id="toggleAmbig" aria-label="Toggle ambiguous character exclusion"></button>
+        </div>
+      </div>
+
+      <!-- Passphrase options -->
+      <div id="ppOptions" style="display:none">
+        <div class="sec-label" style="margin-bottom:8px"><span class="step">3</span> Word count</div>
+        <div class="slider-row">
+          <div><div class="len-big" id="wordVal">5</div><div class="len-unit">words</div></div>
+          <input type="range" id="wordSlider" min="3" max="12" value="5" step="1">
+        </div>
+        <div class="range-labels"><span>3</span><span>5</span><span>7</span><span>10</span><span>12</span></div>
+      </div>
+    </div>
+
+    <!-- Step 5: Geometry influence -->
+    <div class="card">
+      <div class="sec-label"><span class="step">5</span> Geometry influence</div>
+      <div style="margin-bottom:6px">
+        <span class="hint-text">Pure geometric = deterministic. High random = datetime dominates.</span>
+      </div>
+      <div class="purity-row">
+        <span class="purity-lbl">Pure geometric</span>
+        <input type="range" id="puritySlider" min="0" max="100" value="80" step="1" style="flex:1">
+        <span class="purity-lbl">High random</span>
+        <span class="purity-val" id="purityVal">80%</span>
+      </div>
+    </div>
+
+    <!-- Step 6: Seed -->
+    <div class="card">
+      <div class="sec-label"><span class="step">6</span> Seed — number or sentence</div>
+      <textarea class="seed-input" id="seedInput" rows="2"
+        placeholder="42   or   the quick brown fox jumps over the lazy dog"></textarea>
+      <div class="seed-meta">
+        <span class="seed-tag" id="seedType">type: numeric</span>
+        <span class="seed-tag" id="seedHash">hash: 0x0000002A</span>
+      </div>
+      <div class="seed-strength">
+        <div class="ss-bars">
+          <div class="ss-bar" id="sb1"></div>
+          <div class="ss-bar" id="sb2"></div>
+          <div class="ss-bar" id="sb3"></div>
+          <div class="ss-bar" id="sb4"></div>
+        </div>
+        <span class="ss-label" id="ssLbl">seed strength: very weak</span>
+      </div>
+    </div>
+
+    <!-- Entropy factors -->
+    <div class="card">
+      <div class="sec-label"><span class="step blue">i</span> Entropy factors</div>
+      <div class="factors">
+        <div class="factor">
+          <div class="f-lbl">Seed</div>
+          <div class="f-val" id="fSeed">—</div>
+          <div class="f-hash" id="fSeedH">0x——</div>
+        </div>
+        <div class="factor">
+          <div class="f-lbl">Datetime</div>
+          <div class="f-val" id="fTime">—</div>
+          <div class="f-hash" id="fTimeH">0x——</div>
+        </div>
+        <div class="factor">
+          <div class="f-lbl">Geometry</div>
+          <div class="f-val" id="fShape">fibonacci</div>
+          <div class="f-hash" id="fShapeH">0x——</div>
+        </div>
+      </div>
+      <div class="combined-row">
+        <span class="c-lbl">Combined seed</span>
+        <span class="c-val" id="fCombined">—</span>
+      </div>
+    </div>
+
+    <!-- Generate -->
+    <button class="gen-btn" id="genBtn">Generate password — snapshot now</button>
+
+    <!-- Output -->
+    <div class="output-card" id="outputCard">
+      <div class="out-header">
+        <div class="out-lbl">Generated password</div>
+        <div class="out-actions">
+          <button class="qr-btn" id="qrBtn">QR</button>
+          <button class="copy-btn" id="copyBtn">Copy</button>
+        </div>
+      </div>
+      <div class="pwd-text empty" id="pwdOut">Configure above then hit generate</div>
+      <div class="breach-row" id="breachRow"></div>
+    </div>
+
+    <!-- Strength -->
+    <div class="bottom-row">
+      <div class="strength-group">
+        <div class="bars">
+          <div class="bar" id="b1"></div>
+          <div class="bar" id="b2"></div>
+          <div class="bar" id="b3"></div>
+          <div class="bar" id="b4"></div>
+        </div>
+        <span class="str-lbl" id="strLbl">—</span>
+      </div>
+    </div>
+    <div class="ttc-line" id="ttcLine"></div>
+    <div class="entropy-line" id="entropyLine"></div>
+
+    <!-- Session history -->
+    <div class="card" style="margin-top:.875rem">
+      <div class="sec-label"><span class="step green">H</span> Session history</div>
+      <div class="history-list" id="historyList">
+        <div class="no-history">No passwords generated yet</div>
+      </div>
+    </div>
+
+    <!-- QR modal (inline, no position:fixed) -->
+    <div class="qr-overlay-wrap" id="qrOverlay">
+      <div class="qr-modal">
+        <div class="qr-title">Scan to transfer</div>
+        <div class="qr-box" id="qrBox"></div>
+        <div class="qr-note">
+          Point your phone camera at this code to transfer the password.
+          Nothing is sent to any server — generated entirely in your browser.
+        </div>
+        <button class="qr-close" id="qrClose">Close</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <span>Geometric Password</span>
+      <span class="footer-sep">·</span>
+      <span>All generation happens locally in your browser</span>
+      <span class="footer-sep">·</span>
+      <span>No data is ever sent to a server</span>
+    </footer>
+
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

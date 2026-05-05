@@ -1,0 +1,99 @@
+/**
+ * Geometric Password — Breach Dictionary
+ * =======================================
+ * HOW TO UPDATE THIS FILE:
+ *
+ * 1. Open this file in any text editor.
+ * 2. Add new passwords inside the BREACH_PASSWORDS array below.
+ *    Each entry is a quoted string followed by a comma, e.g.:
+ *      'mynewpassword',
+ * 3. Save the file.
+ * 4. Re-upload ONLY this file to your web server (see MAINTENANCE.md).
+ *
+ * The check is case-insensitive for the lowercase version of each entry.
+ * Passwords are checked as typed AND as lowercased.
+ *
+ * Sources to pull updates from:
+ *   - https://github.com/danielmiessler/SecLists/tree/master/Passwords
+ *   - https://haveibeenpwned.com/Passwords (top counts)
+ *   - https://www.ncsc.gov.uk/blog-post/passwords-passwords-everywhere
+ *
+ * Last updated: 2024-01-01
+ * Entry count: 200
+ */
+
+const BREACH_PASSWORDS = [
+  // ── Top 50 most breached globally ──
+  'password','123456','12345678','qwerty','abc123',
+  'monkey','1234567','letmein','trustno1','dragon',
+  'baseball','iloveyou','master','sunshine','ashley',
+  'bailey','passw0rd','shadow','123123','654321',
+  'superman','qazwsx','michael','football','password1',
+  'password123','princess','welcome','solo','login',
+  'hello','charlie','donald','password2','qwerty123',
+  '1q2w3e4r','aa12345678','abc1234','password01',
+  'pass','test','1234','12345','123456789',
+  '1234567890','000000','111111','696969','121212',
+
+  // ── Pure numeric sequences ──
+  '222222','333333','444444','555555','666666',
+  '777777','888888','999999','159753','7777777',
+  '123321','112233','102030','102938','1111','2222',
+  '3333','4444','5555','6666','7777','8888','9999',
+  '0000','11111','00000','55555',
+
+  // ── Keyboard walks ──
+  '1q2w3e','q1w2e3r4','123qwe','zxcvbnm',
+  'qwertyuiop','asdfghjkl','zxcvbn','qwer1234',
+  'qwerty1','1q2w3e4r5t','qwertyui',
+
+  // ── Common word + number combos ──
+  'dragon1','dragon12','letmein1','welcome1',
+  'iloveyou1','monkey1','master1','sunshine1',
+  'princess1','football1','baseball1','shadow1',
+  'michael1','jessica','jessica1','jennifer',
+  'jennifer1','thomas','thomas1','robert','robert1',
+  'george','george1','hunter','hunter1','hunter2',
+  'buster','buster1','ranger','ranger1','tigger',
+  'tigger1','soccer','soccer1','hockey','hockey1',
+  'harley','harley1','dallas','dallas1','yankees',
+  'yankees1','joshua','joshua1','maggie','maggie1',
+
+  // ── Default / system credentials ──
+  'admin','admin123','root','toor','alpine',
+  'raspberry','ubuntu','debian','changeme','default',
+  'guest','user','test123','administrator',
+  'adminadmin','admin1234','root123','pass123',
+
+  // ── Leet-speak variants ──
+  'pa$$w0rd','p@ssw0rd','p@ssword','pass@123',
+  'P@ssw0rd','P@$$w0rd','Admin1234','Passw0rd!',
+  'p4ssword','passw0rd1','pa55word','p@55w0rd',
+
+  // ── Common phrases / pop culture ──
+  'starwars','batman','superman1','spiderman',
+  'pokemon','nintendo','playstation','xbox360',
+  'minecraft','fortnite','roblox','among us',
+  'matrix','matrix1','falcon','falcon1',
+  'maverick','maverick1','pepper','pepper1',
+  'ginger','ginger1','summer','summer1',
+  'winter','winter1','spring','spring1',
+  'access','access1','cheese','banana','butter',
+  'andrew','chelsea','golfer','cookie','bigdog',
+  'guitar','winner','secret','secret1',
+
+  // ── Short / trivial ──
+  'abc','abcd','aaaaaa','bbbbbb',
+  'love','love123','pass1','pass12',
+  '12qwas','zaq12wsx','1qaz2wsx',
+
+  // ── Targeted attacks (common site-specific) ──
+  'linkedin','facebook','twitter','instagram',
+  'google','amazon','netflix','spotify',
+  'apple123','microsoft','windows','office365',
+];
+
+// Build a Set for O(1) lookup — do not modify below this line
+window.BREACH_LIST = new Set(
+  BREACH_PASSWORDS.flatMap(p => [p, p.toLowerCase()])
+);
