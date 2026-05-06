@@ -1,29 +1,30 @@
 /**
+ * data/breach-dictionary.js
  * Geometric Password — Breach Dictionary
- * =======================================
- * HOW TO UPDATE THIS FILE:
+ * ========================================
  *
- * 1. Open this file in any text editor.
- * 2. Add new passwords inside the BREACH_PASSWORDS array below.
- *    Each entry is a quoted string followed by a comma, e.g.:
+ * HOW TO UPDATE THIS FILE
+ * -----------------------
+ * 1. Open this file in any plain text editor (VS Code, Notepad, TextEdit).
+ * 2. Add new passwords to the BREACH_PASSWORDS array below.
+ *    Each entry: single-quoted string + comma.  Example:
  *      'mynewpassword',
  * 3. Save the file.
- * 4. Re-upload ONLY this file to your web server (see MAINTENANCE.md).
+ * 4. On GitHub: navigate to data/breach-dictionary.js → click the pencil ✏️
+ *    icon → make your changes → click "Commit changes".
+ *    GitHub Pages will redeploy automatically within ~60 seconds.
  *
- * The check is case-insensitive for the lowercase version of each entry.
- * Passwords are checked as typed AND as lowercased.
+ * Sources for updates:
+ *   https://github.com/danielmiessler/SecLists/tree/master/Passwords
+ *   https://haveibeenpwned.com/Passwords
+ *   https://www.ncsc.gov.uk/blog-post/passwords-passwords-everywhere
  *
- * Sources to pull updates from:
- *   - https://github.com/danielmiessler/SecLists/tree/master/Passwords
- *   - https://haveibeenpwned.com/Passwords (top counts)
- *   - https://www.ncsc.gov.uk/blog-post/passwords-passwords-everywhere
- *
- * Last updated: 2024-01-01
- * Entry count: 200
+ * Last updated : 2024-01-01
+ * Entry count  : 200
  */
 
 const BREACH_PASSWORDS = [
-  // ── Top 50 most breached globally ──
+  // ── Top breached globally ──
   'password','123456','12345678','qwerty','abc123',
   'monkey','1234567','letmein','trustno1','dragon',
   'baseball','iloveyou','master','sunshine','ashley',
@@ -35,7 +36,7 @@ const BREACH_PASSWORDS = [
   'pass','test','1234','12345','123456789',
   '1234567890','000000','111111','696969','121212',
 
-  // ── Pure numeric sequences ──
+  // ── Numeric sequences ──
   '222222','333333','444444','555555','666666',
   '777777','888888','999999','159753','7777777',
   '123321','112233','102030','102938','1111','2222',
@@ -70,16 +71,16 @@ const BREACH_PASSWORDS = [
   'P@ssw0rd','P@$$w0rd','Admin1234','Passw0rd!',
   'p4ssword','passw0rd1','pa55word','p@55w0rd',
 
-  // ── Common phrases / pop culture ──
+  // ── Pop culture / common phrases ──
   'starwars','batman','superman1','spiderman',
-  'pokemon','nintendo','playstation','xbox360',
-  'minecraft','fortnite','roblox','among us',
-  'matrix','matrix1','falcon','falcon1',
-  'maverick','maverick1','pepper','pepper1',
-  'ginger','ginger1','summer','summer1',
-  'winter','winter1','spring','spring1',
-  'access','access1','cheese','banana','butter',
-  'andrew','chelsea','golfer','cookie','bigdog',
+  'pokemon','nintendo','playstation','minecraft',
+  'fortnite','roblox','matrix','matrix1',
+  'falcon','falcon1','maverick','maverick1',
+  'pepper','pepper1','ginger','ginger1',
+  'summer','summer1','winter','winter1',
+  'spring','spring1','access','access1',
+  'cheese','banana','butter','andrew',
+  'chelsea','golfer','cookie','bigdog',
   'guitar','winner','secret','secret1',
 
   // ── Short / trivial ──
@@ -87,13 +88,13 @@ const BREACH_PASSWORDS = [
   'love','love123','pass1','pass12',
   '12qwas','zaq12wsx','1qaz2wsx',
 
-  // ── Targeted attacks (common site-specific) ──
+  // ── Site-specific common patterns ──
   'linkedin','facebook','twitter','instagram',
   'google','amazon','netflix','spotify',
   'apple123','microsoft','windows','office365',
 ];
 
-// Build a Set for O(1) lookup — do not modify below this line
+// Build O(1) Set — do not modify below this line
 window.BREACH_LIST = new Set(
   BREACH_PASSWORDS.flatMap(p => [p, p.toLowerCase()])
 );
