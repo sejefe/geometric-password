@@ -226,12 +226,21 @@
     return out;
   }
 
+  // Encode unix timestamp as 8 bytes without BigInt/setBigUint64
+  // (setBigUint64 is not supported in all browsers and throws silently on GitHub Pages)
+  function tsToBytes(tsSec) {
+    const b = new Uint8Array(8);
+    b[4] = (tsSec >>> 24) & 0xFF;
+    b[5] = (tsSec >>> 16) & 0xFF;
+    b[6] = (tsSec >>>  8) & 0xFF;
+    b[7] =  tsSec         & 0xFF;
+    return b;
+  }
+
   // Build master key: SHA-256(seedHash ‖ salt ‖ timestamp ‖ shapeId)
-  async function buildMasterKey(seedText, salt, tsBI, shapeId) {
-    const seedHash = await sha256(seedText || '');
-    const tsBytes  = new Uint8Array(8);
-    new DataView(tsBytes.buffer).setBigUint64(0, tsBI, false);
-    const masterKey = await sha256(concat(seedHash, salt, tsBytes, new Uint8Array([shapeId])));
+  async function buildMasterKey(seedText, salt, tsSec, shapeId) {
+    const seedHash  = await sha256(seedText || '');
+    const masterKey = await sha256(concat(seedHash, salt, tsToBytes(tsSec), new Uint8Array([shapeId])));
     return { seedHash, masterKey };
   }
 
@@ -243,9 +252,9 @@
     return SHAPES[k[0] % SHAPES.length];
   }
 
-  // Format a BigInt unix timestamp as a readable string
-  function fmtTimestamp(tsBI) {
-    const d = new Date(Number(tsBI) * 1000);
+  // Format a unix timestamp (plain number, seconds) as readable string
+  function fmtTimestamp(tsSec) {
+    const d = new Date(tsSec * 1000);
     const p = n => String(n).padStart(2, '0');
     return d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate()) +
            ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds());
@@ -253,9 +262,9 @@
 
   /* ── Password generation pipeline ── */
   async function generatePassword(seedText, length, charset, shapeName, shapeId) {
-    const salt = freshSalt();
-    const ts   = BigInt(Math.floor(Date.now() / 1000));
-    const { seedHash, masterKey } = await buildMasterKey(seedText, salt, ts, shapeId);
+    const salt  = freshSalt();
+    const tsSec = Math.floor(Date.now() / 1000);
+    const { seedHash, masterKey } = await buildMasterKey(seedText, salt, tsSec, shapeId);
 
     // Expand to large stream (8× length) to allow rejection sampling headroom
     let stream = applyPermutation(await hmacStream(masterKey, length * 8), shapeName);
@@ -272,16 +281,16 @@
       seedHashHex:  toHex(seedHash),
       saltHex:      toHex(salt),
       masterKeyHex: toHex(masterKey),
-      timestamp:    fmtTimestamp(ts),
+      timestamp:    fmtTimestamp(tsSec),
       shapeName,
     };
   }
 
   /* ── Passphrase generation pipeline ── */
   async function generatePassphrase(seedText, wordCount, shapeName, shapeId) {
-    const salt = freshSalt();
-    const ts   = BigInt(Math.floor(Date.now() / 1000));
-    const { seedHash, masterKey } = await buildMasterKey(seedText, salt, ts, shapeId);
+    const salt  = freshSalt();
+    const tsSec = Math.floor(Date.now() / 1000);
+    const { seedHash, masterKey } = await buildMasterKey(seedText, salt, tsSec, shapeId);
 
     const raw    = await hmacStream(masterKey, wordCount * 4 + 4);
     const permed = applyPermutation(raw, shapeName);
@@ -298,18 +307,20 @@
       seedHashHex:  toHex(seedHash),
       saltHex:      toHex(salt),
       masterKeyHex: toHex(masterKey),
-      timestamp:    fmtTimestamp(ts),
+      timestamp:    fmtTimestamp(tsSec),
       shapeName,
     };
   }
 
   /* ═══════════════════════════════════════════════
      CANVAS ANIMATION
+     CV/ctx declared here as let, assigned inside
+     DOMContentLoaded so getElementById never runs
+     before the canvas element exists in the DOM.
   ═══════════════════════════════════════════════ */
 
-  const CV  = document.getElementById('gc');
-  const ctx = CV.getContext('2d');
-  const CW  = 400, CH = 400, MX = CW / 2, MY = CH / 2;
+  let CV, ctx;
+  const CW = 400, CH = 400, MX = CW / 2, MY = CH / 2;
   let animHandle = null, animShape = 'fibonacci';
 
   function project(x, y, z, rx, ry, sc) {
@@ -533,6 +544,10 @@
   ═══════════════════════════════════════════════ */
 
   document.addEventListener('DOMContentLoaded', function () {
+
+    // Assign canvas references now that the DOM is ready
+    CV  = document.getElementById('gc');
+    ctx = CV.getContext('2d');
 
     // Sliders — update display immediately on every input event
     $id('lenSlider').addEventListener('input', function () {
