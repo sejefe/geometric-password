@@ -1,14 +1,15 @@
 # Geometric Password
 
-> *Geometric Randomness* — SHA-256 seeded · CSPRNG salted · geometrically permuted · 100% client-side
+> **Geometric Randomness** — SHA-256 seeded · 128-bit CSPRNG salt · geometric XOR permutation · 100% client-side
 
-A password generator that uses real cryptographic primitives (Web Crypto API) combined with geometric mathematics to produce strong, unique passwords. No data is ever sent to a server.
+A cryptographically sound password generator that uses the Web Crypto API combined with geometric mathematics to produce strong, unique passwords. Nothing is ever sent to a server.
 
 ---
 
-## Live Demo
+## Live site
 
-Once deployed to GitHub Pages, your site will be at:
+After deploying to GitHub Pages your site will be at:
+
 ```
 https://<your-username>.github.io/geometric-password/
 ```
@@ -21,45 +22,42 @@ https://<your-username>.github.io/geometric-password/
 User seed (text or number)
         │
         ▼
-   SHA-256(seed)                          ← Web Crypto API
+   SHA-256(seed)                         ← crypto.subtle.digest
         │
-        ├─── + crypto.getRandomValues()   ← 128-bit CSPRNG salt (unique per generation)
-        ├─── + Unix timestamp (seconds)
-        └─── + Geometry ID (auto-selected)
+        ├── + crypto.getRandomValues()   ← 128-bit CSPRNG salt (unique every time)
+        ├── + Unix timestamp (seconds)
+        └── + Geometry ID (auto-selected, not user-controlled)
                 │
                 ▼
-        SHA-256(all combined)             ← Master key (256 bits)
+        SHA-256(all combined)            ← 256-bit master key
                 │
                 ▼
-    HMAC-SHA-256 counter mode             ← Cryptographically secure byte stream
+   HMAC-SHA-256 counter mode             ← secure pseudorandom byte stream
                 │
                 ▼
-    Geometric XOR permutation             ← Fibonacci / Dodecahedron / Tetrahedron
+   Geometric XOR permutation             ← Fibonacci / Dodecahedron / Tetrahedron
                 │
                 ▼
-    Rejection sampling → charset          ← No modulo bias
+   Rejection sampling → charset          ← no modulo bias
                 │
                 ▼
-           Password ✓
+          Password ✓
 ```
 
-**The geometry is selected automatically** by the crypto engine from the SHA-256 of the seed + a fresh random salt. Users cannot influence which shape is chosen — it is revealed only after generation.
+The geometry is selected automatically by the engine — the user has no control over which shape is picked. It is revealed in the provenance panel only after generation.
 
 ---
 
-## Features
+## Key design decisions
 
-- 🔐 **SHA-256 seed hashing** — seed text is cryptographically hashed before entering the pipeline
-- 🎲 **128-bit CSPRNG salt** — unique per generation via `crypto.getRandomValues()`
-- 🔑 **HMAC-SHA-256 counter mode** — provably secure key derivation (similar to HKDF-Expand)
-- 📐 **Geometric permutation layer** — Fibonacci spiral, Dodecahedron faces, Tetrahedron edges
-- 🚫 **Rejection sampling** — eliminates modulo bias in character mapping
-- 🔒 **Zero server contact** — everything runs in the browser
-- 📋 **Passphrase mode** — NIST-aligned word sequences
-- 📱 **QR code export** — transfer to mobile without typing
-- 🧾 **Cryptographic provenance** — full audit trail of every derivation input
-- 📖 **Breach dictionary check** — local check against common passwords
-- 🕐 **Session history** — last 10 generated passwords (in-memory only)
+| Decision | Reason |
+|----------|--------|
+| All logic in `js/app.js` (one file) | No module bundler, no load-order issues, GitHub Pages works out of the box |
+| IIFE wrapping | Keeps all variables private, no global namespace pollution |
+| Rejection sampling for charset | Eliminates modulo bias — every character has exactly equal probability |
+| HMAC-SHA-256 counter mode | Standard KDF construction, provably secure stream expansion |
+| 128-bit CSPRNG salt | Same seed + same time never repeats |
+| Geometry as XOR permutation | Scrambles an already-secure stream; security does not depend on keeping the algorithm secret (Kerckhoffs's principle) |
 
 ---
 
@@ -67,43 +65,38 @@ User seed (text or number)
 
 ```
 geometric-password/
-├── index.html                  ← Main page
+├── index.html                  ← page structure and script loading order
 ├── css/
-│   └── style.css               ← All styles
+│   └── style.css               ← all styles and CSS variables
 ├── js/
-│   ├── crypto-engine.js        ← SHA-256, CSPRNG, master key, stream generation
-│   ├── geometry.js             ← Geometric data and permutation kernels
-│   ├── canvas.js               ← Animated 3D shape rendering
-│   ├── ui.js                   ← DOM helpers, display logic
-│   └── app.js                  ← Application orchestrator, event listeners
+│   └── app.js                  ← entire application: crypto, geometry, canvas, UI, events
 └── data/
-    └── breach-dictionary.js    ← Common password blocklist (update regularly)
+    └── breach-dictionary.js    ← common password blocklist (update regularly)
 ```
 
 ---
 
-## Deploying to GitHub Pages
+## Deploy to GitHub Pages
 
 ### Step 1 — Create the repository
 
 1. Go to [github.com](https://github.com) and sign in (or create a free account).
-2. Click the **+** icon → **New repository**.
-3. Name it exactly: `geometric-password`
-4. Set visibility to **Public**.
-5. Leave all other options as default.
-6. Click **Create repository**.
+2. Click **+** → **New repository**.
+3. Name it `geometric-password`, set to **Public**, leave all other options as default.
+4. Click **Create repository**.
 
 ### Step 2 — Upload the files
 
-**Option A — GitHub web interface (no Git required):**
+**Via the GitHub web interface (no Git required):**
 
-1. On your new repository page, click **uploading an existing file**.
-2. Drag and drop the entire contents of the `geometric-password/` folder.
-   > ⚠️ Upload the *contents* of the folder, not the folder itself.
-   > GitHub needs to see `index.html` at the root level.
-3. Scroll down, add a commit message like `Initial upload`, click **Commit changes**.
+1. On your new repository page, click **"uploading an existing file"**.
+2. Drag and drop the **contents** of this folder.
 
-**Option B — Git command line:**
+   > ⚠️ Upload the *contents* — GitHub needs `index.html` at the root level, not inside a subfolder.
+
+3. Add a commit message such as `Initial upload` → click **Commit changes**.
+
+**Via Git command line:**
 
 ```bash
 cd geometric-password
@@ -123,60 +116,60 @@ git push -u origin main
    - Branch: **main**
    - Folder: **/ (root)**
 4. Click **Save**.
-5. Wait ~60 seconds. Refresh the page.
-6. A green banner will appear: *"Your site is live at https://your-username.github.io/geometric-password/"*
+5. Wait ~60 seconds, then refresh — a green banner will show your live URL.
 
-> **HTTPS is automatic and free** on GitHub Pages. The Web Crypto API (required for SHA-256 and CSPRNG) only works over HTTPS, so this is essential.
+> **HTTPS is automatic and free** on GitHub Pages. The Web Crypto API (`crypto.subtle`, `crypto.getRandomValues`) requires HTTPS — this is why GitHub Pages is the simplest hosting choice.
 
 ---
 
 ## Updating the breach dictionary
 
-The breach dictionary is a plain JavaScript file at `data/breach-dictionary.js`.
+The breach list lives entirely in `data/breach-dictionary.js`.
 
-### Via GitHub web interface (easiest)
+### Via the GitHub web interface (easiest — no Git needed)
 
 1. Navigate to `data/breach-dictionary.js` in your repository.
-2. Click the **pencil icon ✏️** (Edit this file).
-3. Find the `BREACH_PASSWORDS` array and add new entries:
+2. Click the **pencil icon ✏️**.
+3. Add new entries inside the `BREACH_PASSWORDS` array:
    ```javascript
    'mynewpassword',
    'anotherweakone',
    ```
-4. Scroll down → click **Commit changes** → **Commit changes** again.
-5. GitHub Pages redeploys automatically in ~60 seconds.
+4. Click **Commit changes** → **Commit changes**.
+
+GitHub Pages redeploys automatically within ~60 seconds.
 
 ### Via Git
 
 ```bash
-# Edit the file locally
-nano data/breach-dictionary.js
+# Edit locally
+nano data/breach-dictionary.js   # or use any text editor
 
 # Commit and push
 git add data/breach-dictionary.js
-git commit -m "Update breach dictionary - $(date +%Y-%m-%d)"
+git commit -m "Update breach dictionary $(date +%Y-%m-%d)"
 git push
 ```
 
 ### Entry format rules
 
 - Each entry: single quotes + comma: `'example',`
-- Checks are case-insensitive (`'Password'` also catches `'PASSWORD'`)
-- Don't modify the `window.BREACH_LIST = new Set(...)` line at the bottom
+- Checks are case-insensitive — `'Password'` also catches `'PASSWORD'` and `'password'`
+- Do **not** modify the `window.BREACH_LIST = new Set(...)` line at the bottom of the file
 
-### Where to find new breach data
+### Sources for new entries
 
-| Source | URL |
-|--------|-----|
-| SecLists (top 1000) | https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10-million-password-list-top-1000.txt |
-| NCSC UK blocklist | https://www.ncsc.gov.uk/blog-post/passwords-passwords-everywhere |
-| HIBP top passwords | https://haveibeenpwned.com/Passwords |
+| Source | Link |
+|--------|------|
+| SecLists top 1 000 | https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10-million-password-list-top-1000.txt |
+| NCSC UK password guidance | https://www.ncsc.gov.uk/blog-post/passwords-passwords-everywhere |
+| Have I Been Pwned top passwords | https://haveibeenpwned.com/Passwords |
 
 ---
 
-## Updating other content
+## Making other changes
 
-### Change the site name or tagline
+### Change site name or tagline
 
 Edit `index.html`:
 ```html
@@ -190,25 +183,31 @@ Edit `index.html`:
 Edit the `:root` block at the top of `css/style.css`:
 ```css
 :root {
-  --accent: #e8553e;   /* orange-red — main highlight colour */
-  --blue:   #3d6cfa;   /* blue — active states */
-  --green:  #18a96a;   /* green — success states */
-  --purple: #7c3aed;   /* purple — crypto provenance */
-  --ink:    #1a1b26;   /* dark — hero background */
+  --accent:  #e8553e;   /* orange-red — main highlights */
+  --blue:    #3d6cfa;   /* blue — active states */
+  --green:   #18a96a;   /* green — success */
+  --purple:  #7c3aed;   /* purple — crypto provenance */
+  --ink:     #1a1b26;   /* dark — hero background */
 }
 ```
 
-### Expand the wordlist (passphrase mode)
+### Expand the passphrase wordlist
 
-Edit the `WORDS` array in `js/ui.js`. Keep words short (4–8 letters), common English, no proper nouns.
+Edit the `WORDS` array near the top of `js/app.js`. Keep entries short (4–8 letters), common English, no proper nouns.
+
+### Add a new geometry
+
+1. In `js/app.js`, add the shape name to the `SHAPES` array and a description to `SHAPE_METHODS`.
+2. Add a `drawXxx(t)` canvas function and call it from the `runAnimation` frame loop.
+3. Add an `xorXxx(stream)` permutation function and add a case in `applyPermutation`.
 
 ---
 
 ## Requirements
 
-- **HTTPS** — required for Web Crypto API (`crypto.subtle`, `crypto.getRandomValues`). GitHub Pages provides this automatically.
+- **HTTPS** — required for `crypto.subtle` and `crypto.getRandomValues`. GitHub Pages provides this automatically.
 - **Modern browser** — Chrome 60+, Firefox 60+, Safari 12+, Edge 79+.
-- **No backend** — pure static site, no Node.js, no server configuration needed.
+- **No backend** — pure static site, zero server-side code.
 
 ---
 
@@ -216,22 +215,22 @@ Edit the `WORDS` array in `js/ui.js`. Keep words short (4–8 letters), common E
 
 | Problem | Fix |
 |---------|-----|
-| Site not updating after edit | Hard refresh: `Ctrl+Shift+R` (Win) / `Cmd+Shift+R` (Mac) |
-| Copy button not working | Must be served over HTTPS. GitHub Pages does this automatically. |
-| QR code blank | QR library CDN may be blocked. Check browser console for errors. |
-| Breach check always safe | Check `data/breach-dictionary.js` path is correct and file loaded (browser console). |
-| Fonts look wrong | Google Fonts CDN blocked (corporate network). Fonts fall back to system sans-serif. |
-| Generation error in console | Web Crypto API unavailable. Confirm URL starts with `https://`. |
+| Site not updating after a commit | Hard refresh: `Ctrl+Shift+R` (Win/Linux) / `Cmd+Shift+R` (Mac) |
+| Copy button not working | Must be served over HTTPS. Local `file://` URLs won't work — use GitHub Pages. |
+| QR code blank | CDN may be temporarily unavailable. Try refreshing. Check browser console. |
+| Breach check always green | Verify `data/breach-dictionary.js` loaded — check browser console for 404 errors. |
+| Generation fails with error | Confirm URL starts with `https://` — Web Crypto requires a secure context. |
+| Fonts not loading | Google Fonts CDN blocked (some corporate networks). Text falls back to system sans-serif — everything still works. |
 
 ---
 
 ## Security notes
 
-- **Nothing is logged.** The site has no analytics, no cookies, no localStorage usage.
-- **The seed is never stored.** It exists only in the browser's memory during the session.
-- **The salt is never reused.** A fresh 128-bit salt is generated via CSPRNG on every generation.
-- **The geometry is not secret.** It is a permutation layer that scrambles an already-secure stream — security does not depend on keeping the algorithm secret (Kerckhoffs's principle).
-- **The breach dictionary is local.** No network request is made for breach checking.
+- **Nothing is logged.** No analytics, no cookies, no `localStorage` usage.
+- **The seed is never stored** beyond the browser's memory for the current session.
+- **The salt is never reused.** 128 bits from `crypto.getRandomValues()` on every generation.
+- **Geometry is not secret.** It is a permutation layer on top of an already-secure stream. Per Kerckhoffs's principle, security does not depend on hiding the algorithm.
+- **Breach checking is fully offline.** No network request is made.
 
 ---
 

@@ -1,30 +1,31 @@
 /**
- * data/breach-dictionary.js
- * Geometric Password — Breach Dictionary
- * ========================================
- *
- * HOW TO UPDATE THIS FILE
+ * data/breach-dictionary.js  —  Geometric Password
+ * ===================================================
+ * HOW TO UPDATE ON GITHUB
  * -----------------------
- * 1. Open this file in any plain text editor (VS Code, Notepad, TextEdit).
- * 2. Add new passwords to the BREACH_PASSWORDS array below.
- *    Each entry: single-quoted string + comma.  Example:
- *      'mynewpassword',
- * 3. Save the file.
- * 4. On GitHub: navigate to data/breach-dictionary.js → click the pencil ✏️
- *    icon → make your changes → click "Commit changes".
- *    GitHub Pages will redeploy automatically within ~60 seconds.
+ * 1. Navigate to this file in your GitHub repository.
+ * 2. Click the pencil icon ✏️  (Edit this file).
+ * 3. Add new passwords inside the BREACH_PASSWORDS array below.
+ *    Format: single-quoted string + comma on its own line.
+ *      'newpassword123',
+ * 4. Click "Commit changes" → "Commit changes" again.
+ *    GitHub Pages redeploys automatically within ~60 seconds.
  *
- * Sources for updates:
- *   https://github.com/danielmiessler/SecLists/tree/master/Passwords
- *   https://haveibeenpwned.com/Passwords
- *   https://www.ncsc.gov.uk/blog-post/passwords-passwords-everywhere
+ * SOURCES FOR NEW ENTRIES
+ * -----------------------
+ *   SecLists top 1000:
+ *     https://github.com/danielmiessler/SecLists/blob/master/Passwords/Common-Credentials/10-million-password-list-top-1000.txt
+ *   NCSC UK:
+ *     https://www.ncsc.gov.uk/blog-post/passwords-passwords-everywhere
+ *   HIBP top passwords:
+ *     https://haveibeenpwned.com/Passwords
  *
  * Last updated : 2024-01-01
  * Entry count  : 200
  */
 
 const BREACH_PASSWORDS = [
-  // ── Top breached globally ──
+  // ── Top globally breached ──
   'password','123456','12345678','qwerty','abc123',
   'monkey','1234567','letmein','trustno1','dragon',
   'baseball','iloveyou','master','sunshine','ashley',
@@ -88,13 +89,13 @@ const BREACH_PASSWORDS = [
   'love','love123','pass1','pass12',
   '12qwas','zaq12wsx','1qaz2wsx',
 
-  // ── Site-specific common patterns ──
+  // ── Common site-specific patterns ──
   'linkedin','facebook','twitter','instagram',
   'google','amazon','netflix','spotify',
   'apple123','microsoft','windows','office365',
 ];
 
-// Build O(1) Set — do not modify below this line
+// Build O(1) lookup Set — do not modify below this line
 window.BREACH_LIST = new Set(
   BREACH_PASSWORDS.flatMap(p => [p, p.toLowerCase()])
 );

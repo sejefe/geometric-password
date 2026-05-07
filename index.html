@@ -3,38 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Geometric Password — SHA-256 + CSPRNG + geometric permutation password generator. All generation is local. Nothing is sent to any server.">
+  <meta name="description" content="Geometric Password — SHA-256 seeded, CSPRNG salted, geometrically permuted password generator. 100% client-side. Zero server contact.">
   <meta name="theme-color" content="#1a1b26">
-
-  <!-- Open Graph -->
   <meta property="og:title" content="Geometric Password — Geometric Randomness">
-  <meta property="og:description" content="SHA-256 seeded, CSPRNG salted, geometrically permuted password generation. 100% client-side.">
+  <meta property="og:description" content="SHA-256 + CSPRNG + geometric permutation. All generation is local.">
   <meta property="og:type" content="website">
-
   <title>Geometric Password — Geometric Randomness</title>
-
-  <!-- Inline SVG favicon -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231a1b26'/><polygon points='16,4 28,24 4,24' stroke='%23e8553e' stroke-width='1.5' fill='none'/><circle cx='16' cy='16' r='2' fill='%233d6cfa'/></svg>">
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-
-  <!-- QR Code library (CDN) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-  <!-- Breach dictionary — update this file to refresh the list -->
-  <script src="data/breach-dictionary.js"></script>
-
-  <!-- Styles -->
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div class="app">
 
-  <!-- ── Hero ── -->
   <header class="hero">
     <div class="hero-grid"></div>
     <div class="hero-glow"></div>
@@ -42,29 +25,26 @@
       <div class="site-eyebrow">Geometric Password</div>
       <h1 class="headline">Geometric<br><em>Randomness</em></h1>
       <p class="tagline">// SHA-256 · CSPRNG · geometric permutation · unique every time</p>
-      <div class="crypto-badge">SHA-256 + Web Crypto CSPRNG + geometric permutation layer</div>
+      <div class="crypto-badge">🔐 SHA-256 + Web Crypto CSPRNG + geometric permutation</div>
     </div>
   </header>
 
-  <!-- ── Body ── -->
   <main class="body">
 
-    <!-- Shape preview -->
     <div class="canvas-card">
       <div class="canvas-bg">
         <canvas id="gc" width="400" height="400" aria-label="Animated geometric shape preview"></canvas>
       </div>
-      <span class="shape-badge" id="shapeLabel">selecting geometry…</span>
-      <p class="method-text" id="methodText">Geometry is selected automatically by the crypto engine on each generation</p>
+      <span class="shape-badge" id="shapeLabel">awaiting generation…</span>
+      <p class="method-text" id="methodText">Geometry is chosen automatically by the crypto engine on each generation</p>
     </div>
 
-    <!-- Step 1: Mode -->
     <div class="card">
       <div class="sec-label"><span class="step">1</span> Output mode</div>
       <div class="mode-row">
         <button class="mode-btn active" data-mode="password">
           <span class="m-name">Password</span>
-          <span class="m-desc">Character-based cipher</span>
+          <span class="m-desc">Character cipher</span>
         </button>
         <button class="mode-btn" data-mode="passphrase">
           <span class="m-name">Passphrase</span>
@@ -72,20 +52,15 @@
         </button>
       </div>
 
-      <!-- Password controls -->
       <div id="pwdOptions">
         <div class="sec-label" style="margin-bottom:8px"><span class="step">2</span> Length</div>
         <div class="slider-row">
-          <div>
-            <div class="len-big" id="lenVal">24</div>
-            <div class="len-unit">chars</div>
-          </div>
-          <input type="range" id="lenSlider" min="5" max="100" value="24" step="1"
-                 aria-label="Password length">
+          <div><div class="len-big" id="lenVal">24</div><div class="len-unit">chars</div></div>
+          <input type="range" id="lenSlider" min="5" max="100" value="24" step="1" aria-label="Password length">
         </div>
         <div class="range-labels"><span>5</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
 
-        <div class="sec-label" style="margin-top:1rem;margin-bottom:8px"><span class="step">3</span> Character set</div>
+        <div class="sec-label" style="margin-top:.875rem;margin-bottom:8px"><span class="step">3</span> Character set</div>
         <div class="cs-grid">
           <button class="cs-btn active" data-cs="full">
             <div class="cs-radio"><div class="cs-dot"></div></div>
@@ -105,39 +80,32 @@
           </button>
         </div>
 
-        <div class="toggle-row" style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+        <div class="toggle-row">
           <div class="toggle-info">
             <div class="toggle-name">Exclude ambiguous characters</div>
-            <div class="toggle-desc">Remove 0 O o 1 l I ` ' " to avoid visual confusion when typing</div>
+            <div class="toggle-desc">Remove 0 O o 1 l I ` ' " to avoid visual confusion</div>
           </div>
-          <button class="toggle" id="toggleAmbig" role="switch" aria-checked="false"
-                  aria-label="Exclude ambiguous characters"></button>
+          <button class="toggle" id="toggleAmbig" role="switch" aria-checked="false" aria-label="Exclude ambiguous characters"></button>
         </div>
       </div>
 
-      <!-- Passphrase controls -->
       <div id="ppOptions" style="display:none">
         <div class="sec-label" style="margin-bottom:8px"><span class="step">2</span> Word count</div>
         <div class="slider-row">
-          <div>
-            <div class="len-big" id="wordVal">5</div>
-            <div class="len-unit">words</div>
-          </div>
-          <input type="range" id="wordSlider" min="3" max="12" value="5" step="1"
-                 aria-label="Passphrase word count">
+          <div><div class="len-big" id="wordVal">5</div><div class="len-unit">words</div></div>
+          <input type="range" id="wordSlider" min="3" max="12" value="5" step="1" aria-label="Word count">
         </div>
         <div class="range-labels"><span>3</span><span>5</span><span>7</span><span>10</span><span>12</span></div>
       </div>
     </div>
 
-    <!-- Step 4: Seed -->
     <div class="card">
       <div class="sec-label"><span class="step">4</span> Seed — number or sentence</div>
       <textarea class="seed-input" id="seedInput" rows="2"
         placeholder="42   or   the quick brown fox jumps over the lazy dog"
-        aria-label="Password seed — enter a number or sentence"></textarea>
+        aria-label="Password seed"></textarea>
       <div class="seed-meta">
-        <span class="seed-tag" id="seedType">type: numeric</span>
+        <span class="seed-tag" id="seedType">type: empty</span>
         <span class="seed-tag" id="seedHash">SHA-256: pending…</span>
       </div>
       <div class="seed-strength">
@@ -151,10 +119,8 @@
       </div>
     </div>
 
-    <!-- Generate button -->
     <button class="gen-btn" id="genBtn">Generate password — snapshot now</button>
 
-    <!-- Crypto provenance panel (revealed after generation) -->
     <div class="provenance" id="provPanel" style="display:none" aria-live="polite">
       <div class="prov-title">
         <span class="step purple" style="width:16px;height:16px;font-size:8px">🔐</span>
@@ -172,56 +138,46 @@
       </div>
     </div>
 
-    <!-- Output -->
     <div class="output-card" id="outputCard">
       <div class="out-header">
         <div class="out-lbl">Generated password</div>
         <div class="out-actions">
           <button class="qr-btn" id="qrBtn" aria-label="Show QR code">QR</button>
-          <button class="copy-btn" id="copyBtn" aria-label="Copy password to clipboard">Copy</button>
+          <button class="copy-btn" id="copyBtn" aria-label="Copy to clipboard">Copy</button>
         </div>
       </div>
       <div class="pwd-text empty" id="pwdOut" aria-live="polite">Configure above then hit generate</div>
       <div class="breach-row" id="breachRow" role="alert"></div>
     </div>
 
-    <!-- Strength indicators -->
-    <div class="bottom-row">
-      <div class="strength-group">
-        <div class="bars" aria-label="Password strength">
-          <div class="bar" id="b1"></div>
-          <div class="bar" id="b2"></div>
-          <div class="bar" id="b3"></div>
-          <div class="bar" id="b4"></div>
-        </div>
-        <span class="str-lbl" id="strLbl">—</span>
+    <div class="strength-row">
+      <div class="bars">
+        <div class="bar" id="b1"></div>
+        <div class="bar" id="b2"></div>
+        <div class="bar" id="b3"></div>
+        <div class="bar" id="b4"></div>
       </div>
+      <span class="str-lbl" id="strLbl">—</span>
     </div>
     <div class="ttc-line" id="ttcLine"></div>
     <div class="entropy-line" id="entropyLine"></div>
 
-    <!-- Session history -->
-    <div class="card" style="margin-top:.875rem">
+    <div class="card" style="margin-top:.75rem">
       <div class="sec-label"><span class="step green">H</span> Session history</div>
       <div class="history-list" id="historyList" aria-live="polite">
         <div class="no-history">No passwords generated yet</div>
       </div>
     </div>
 
-    <!-- QR modal (inline) -->
-    <div class="qr-overlay-wrap" id="qrOverlay" role="dialog" aria-modal="true" aria-label="QR code transfer">
+    <div class="qr-overlay-wrap" id="qrOverlay" role="dialog" aria-modal="true" aria-label="QR code">
       <div class="qr-modal">
         <div class="qr-title">Scan to transfer</div>
         <div class="qr-box" id="qrBox"></div>
-        <p class="qr-note">
-          Point your phone camera at this code to transfer the password.
-          Nothing is sent to any server — generated entirely in your browser.
-        </p>
+        <p class="qr-note">Point your phone camera at this code. Nothing is sent to any server — generated entirely in your browser.</p>
         <button class="qr-close" id="qrClose">Close</button>
       </div>
     </div>
 
-    <!-- Footer -->
     <footer class="site-footer">
       <span>Geometric Password</span>
       <span class="footer-sep">·</span>
@@ -233,12 +189,11 @@
   </main>
 </div>
 
-<!-- Main application logic -->
-<script src="js/crypto-engine.js"></script>
-<script src="js/geometry.js"></script>
-<script src="js/canvas.js"></script>
-<script src="js/ui.js"></script>
+<!-- QR library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- Breach dictionary — edit data/breach-dictionary.js to update -->
+<script src="data/breach-dictionary.js"></script>
+<!-- App — single unified script, no module bundler required -->
 <script src="js/app.js"></script>
-
 </body>
 </html>
